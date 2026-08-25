@@ -11,9 +11,14 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   // Inicializa datas
-  $("referenceDate").value = today();
-  $("date").value = today();
-  $("todayLabel").textContent = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+  const refDateInput = $("referenceDate");
+  if (refDateInput) refDateInput.value = today();
+  const dateInput = $("date");
+  if (dateInput) dateInput.value = today();
+  const todayLabel = $("todayLabel");
+  if (todayLabel) {
+    todayLabel.textContent = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+  }
 
   function save() {
     localStorage.setItem(KEY, JSON.stringify(transactions));
@@ -21,8 +26,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function range() {
-    let ref = new Date($("referenceDate").value + "T12:00:00");
-    let p = $("periodFilter").value;
+    const ref = new Date($("referenceDate").value + "T12:00:00");
+    const p = $("periodFilter").value;
     let s, e;
     if (p === "day") {
       s = e = new Date(ref);
@@ -43,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function inRange(t, r) {
-    let d = new Date(t.date + "T12:00:00");
+    const d = new Date(t.date + "T12:00:00");
     return d >= r.s && d <= r.e;
   }
 
@@ -53,13 +58,13 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function renderDash() {
-    let r = range();
-    let arr = transactions.filter(t => inRange(t, r));
-    let inc = arr.filter(t => t.type === "income");
-    let exp = arr.filter(t => t.type === "expense");
-    let ti = inc.reduce((a, t) => a + t.amount, 0);
-    let te = exp.reduce((a, t) => a + t.amount, 0);
-    let pending = exp.filter(t => t.status === "pending").reduce((a, t) => a + t.amount, 0);
+    const r = range();
+    const arr = transactions.filter(t => inRange(t, r));
+    const inc = arr.filter(t => t.type === "income");
+    const exp = arr.filter(t => t.type === "expense");
+    const ti = inc.reduce((a, t) => a + t.amount, 0);
+    const te = exp.reduce((a, t) => a + t.amount, 0);
+    const pending = exp.filter(t => t.status === "pending").reduce((a, t) => a + t.amount, 0);
 
     $("totalIncome").textContent = money(ti);
     $("totalExpense").textContent = money(te);
@@ -67,54 +72,38 @@ document.addEventListener('DOMContentLoaded', function() {
     $("pending").textContent = money(pending);
     $("incomeCount").textContent = inc.length + " lançamento(s)";
     $("expenseCount").textContent = exp.length + " lançamento(s)";
-    $("periodText").textContent = $("periodFilter").selectedOptions[0].text;
+    const periodText = $("periodText");
+    if (periodText) periodText.textContent = $("periodFilter").selectedOptions[0].text;
 
     let cat = {};
     arr.forEach(t => {
-      let key = t.category || "Sem categoria";
+      const key = t.category || "Sem categoria";
       cat[key] = (cat[key] || 0) + (t.type === "income" ? t.amount : -t.amount);
     });
-    $("summaryList").innerHTML = Object.entries(cat)
-      .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
-      .slice(0, 8)
-      .map(([k, v]) => `<div class="summary-row"><b>${esc(k)}</b><span class="${v >= 0 ? "green" : "red"}">${money(v)}</span></div>`)
-      .join("") || "<p>Sem lançamentos no período.</p>";
+    const summaryList = $("summaryList");
+    if (summaryList) {
+      summaryList.innerHTML = Object.entries(cat)
+        .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+        .slice(0, 8)
+        .map(([k, v]) => `<div class="summary-row"><b>${esc(k)}</b><span class="${v >= 0 ? "green" : "red"}">${money(v)}</span></div>`)
+        .join("") || "<p>Sem lançamentos no período.</p>";
+    }
 
-    let upcoming = transactions
+    const upcoming = transactions
       .filter(t => t.type === "expense" && t.status === "pending")
       .sort((a, b) => (a.dueDate || a.date).localeCompare(b.dueDate || b.date))
       .slice(0, 8);
-    $("upcomingList").innerHTML = table(upcoming, true);
+    const upcomingList = $("upcomingList");
+    if (upcomingList) upcomingList.innerHTML = table(upcoming, true);
 
     drawChart(arr, r);
   }
 
   function drawChart(arr, r) {
-    let labels = [],
-      valsI = [],
-      valsE = [];
-    let start = new Date(r.s),
-      end = new Date(r.e);
-    let days = Math.round((end - start) / 86400000) + 1;
-    let step = $("periodFilter").value === "month" && days > 20 ? 1 : 1;
-
-    for (let i = 0; i < days; i += step) {
-      let d = new Date(start);
-      d.setDate(start.getDate() + i);
-      let key = d.toISOString().slice(0, 10);
-      labels.push(d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }));
-      valsI.push(arr.filter(t => t.date === key && t.type === "income").reduce((a, t) => a + t.amount, 0));
-      valsE.push(arr.filter(t => t.date === key && t.type === "expense").reduce((a, t) => a + t.amount, 0));
-    }
-
-    if (chart) {
-      chart.destroy();
-      chart = null;
-    }
-
     const canvas = $("financeChart");
     if (!canvas) return;
 
+    // Se o Chart.js não estiver disponível, exibe mensagem
     if (typeof Chart === 'undefined') {
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -123,6 +112,26 @@ document.addEventListener('DOMContentLoaded', function() {
       ctx.textAlign = 'center';
       ctx.fillText('Carregando gráfico...', canvas.width / 2, canvas.height / 2);
       return;
+    }
+
+    const labels = [], valsI = [], valsE = [];
+    const start = new Date(r.s);
+    const end = new Date(r.e);
+    const days = Math.round((end - start) / 86400000) + 1;
+    const step = $("periodFilter").value === "month" && days > 20 ? 1 : 1;
+
+    for (let i = 0; i < days; i += step) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const key = d.toISOString().slice(0, 10);
+      labels.push(d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }));
+      valsI.push(arr.filter(t => t.date === key && t.type === "income").reduce((a, t) => a + t.amount, 0));
+      valsE.push(arr.filter(t => t.date === key && t.type === "expense").reduce((a, t) => a + t.amount, 0));
+    }
+
+    if (chart) {
+      chart.destroy();
+      chart = null;
     }
 
     chart = new Chart(canvas.getContext("2d"), {
@@ -154,17 +163,18 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function renderTable() {
-    let q = $("searchInput").value.toLowerCase();
-    let tf = $("typeFilter").value;
-    let sf = $("statusFilter").value;
-    let arr = transactions
+    const q = $("searchInput").value.toLowerCase();
+    const tf = $("typeFilter").value;
+    const sf = $("statusFilter").value;
+    const arr = transactions
       .filter(t =>
         (tf === "all" || t.type === tf) &&
         (sf === "all" || t.status === sf) &&
         [t.description, t.category, t.method, t.note].join(" ").toLowerCase().includes(q)
       )
       .sort((a, b) => b.date.localeCompare(a.date));
-    $("transactionsTable").innerHTML = table(arr);
+    const tableContainer = $("transactionsTable");
+    if (tableContainer) tableContainer.innerHTML = table(arr);
   }
 
   function br(x) {
@@ -198,43 +208,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (modal) modal.classList.add("hidden");
   }
 
-  // Navegação de período
-  function prevPeriod() {
-    const input = $("referenceDate");
-    let date = new Date(input.value + "T12:00:00");
-    const period = $("periodFilter").value;
-    if (period === "day") {
-      date.setDate(date.getDate() - 1);
-    } else if (period === "week") {
-      date.setDate(date.getDate() - 7);
-    } else if (period === "month") {
-      date.setMonth(date.getMonth() - 1);
-    } else {
-      return;
-    }
-    input.value = date.toISOString().slice(0, 10);
-    input.dispatchEvent(new Event("input"));
-  }
-
-  function nextPeriod() {
-    const input = $("referenceDate");
-    let date = new Date(input.value + "T12:00:00");
-    const period = $("periodFilter").value;
-    if (period === "day") {
-      date.setDate(date.getDate() + 1);
-    } else if (period === "week") {
-      date.setDate(date.getDate() + 7);
-    } else if (period === "month") {
-      date.setMonth(date.getMonth() + 1);
-    } else {
-      return;
-    }
-    input.value = date.toISOString().slice(0, 10);
-    input.dispatchEvent(new Event("input"));
-  }
-
-  // --- Event Listeners ---
-
   // Navegação entre abas
   document.querySelectorAll(".nav-btn").forEach(btn => {
     btn.addEventListener("click", function() {
@@ -242,8 +215,8 @@ document.addEventListener('DOMContentLoaded', function() {
       this.classList.add("active");
       const view = this.dataset.view;
       const dash = $("dashboardView");
-      if (dash) dash.classList.toggle("hidden", view !== "dashboard");
       const lanc = $("lancamentosView");
+      if (dash) dash.classList.toggle("hidden", view !== "dashboard");
       if (lanc) lanc.classList.toggle("hidden", view !== "lancamentos");
       const title = $("pageTitle");
       if (title) title.textContent = view === "dashboard" ? "Dashboard" : "Lançamentos";
@@ -268,12 +241,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (btn) btn.click();
     });
   }
-
-  // Navegação de período (botões)
-  const prevBtn = $("prevPeriod");
-  const nextBtn = $("nextPeriod");
-  if (prevBtn) prevBtn.addEventListener("click", prevPeriod);
-  if (nextBtn) nextBtn.addEventListener("click", nextPeriod);
 
   // Submissão do formulário
   const form = $("transactionForm");
@@ -319,6 +286,38 @@ document.addEventListener('DOMContentLoaded', function() {
     const el = $(id);
     if (el) el.addEventListener("input", render);
   });
+
+  // Navegação de período
+  function prevPeriod() {
+    const input = $("referenceDate");
+    if (!input) return;
+    let date = new Date(input.value + "T12:00:00");
+    const period = $("periodFilter").value;
+    if (period === "day") date.setDate(date.getDate() - 1);
+    else if (period === "week") date.setDate(date.getDate() - 7);
+    else if (period === "month") date.setMonth(date.getMonth() - 1);
+    else return;
+    input.value = date.toISOString().slice(0, 10);
+    input.dispatchEvent(new Event("input"));
+  }
+
+  function nextPeriod() {
+    const input = $("referenceDate");
+    if (!input) return;
+    let date = new Date(input.value + "T12:00:00");
+    const period = $("periodFilter").value;
+    if (period === "day") date.setDate(date.getDate() + 1);
+    else if (period === "week") date.setDate(date.getDate() + 7);
+    else if (period === "month") date.setMonth(date.getMonth() + 1);
+    else return;
+    input.value = date.toISOString().slice(0, 10);
+    input.dispatchEvent(new Event("input"));
+  }
+
+  const prevBtn = $("prevPeriod");
+  const nextBtn = $("nextPeriod");
+  if (prevBtn) prevBtn.addEventListener("click", prevPeriod);
+  if (nextBtn) nextBtn.addEventListener("click", nextPeriod);
 
   // Exportar
   const exportBtn = $("exportBtn");
@@ -368,15 +367,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Carregar Chart.js e renderizar
+  // Carregar Chart.js
   const chartScript = document.createElement("script");
   chartScript.src = "https://cdn.jsdelivr.net/npm/chart.js";
   chartScript.onload = render;
   chartScript.onerror = function() {
-    render();
+    render(); // renderiza sem gráfico (mensagem de fallback)
   };
   document.head.appendChild(chartScript);
 
-  // Renderização inicial
+  // Renderização inicial (caso o Chart demore ou falhe)
   render();
 });
