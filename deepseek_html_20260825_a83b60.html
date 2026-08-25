@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Financeiro</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h1>FINANCEIRO</h1>
+      <p class="subtitle">Contas & Receitas</p>
+      <nav>
+        <button class="nav-btn active" data-view="dashboard">📊 Dashboard</button>
+        <button class="nav-btn" data-view="lancamentos">🧾 Lançamentos</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <button id="exportBtn">⬇ Exportar dados</button>
+        <label class="import-label">⬆ Importar dados<input id="importFile" type="file" accept=".json"></label>
+        <button id="clearBtn" class="danger">🗑 Limpar tudo</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <p id="todayLabel"></p>
+        </div>
+        <button id="addBtn" class="primary">＋ Novo lançamento</button>
+      </header>
+
+      <section id="dashboardView" class="view">
+        <div class="filters">
+          <div>
+            <label>Período</label>
+            <select id="periodFilter">
+              <option value="day">Hoje</option>
+              <option value="week">Esta semana</option>
+              <option value="month" selected>Este mês</option>
+              <option value="all">Todos</option>
+            </select>
+          </div>
+          <div class="date-control">
+            <label>Data de referência</label>
+            <div class="date-input-group">
+              <button id="prevPeriod" class="nav-btn-icon" title="Período anterior">◀</button>
+              <input type="date" id="referenceDate">
+              <button id="nextPeriod" class="nav-btn-icon" title="Próximo período">▶</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cards">
+          <div class="card income"><span>Receitas</span><strong id="totalIncome">R$ 0,00</strong><small id="incomeCount">0 lançamentos</small></div>
+          <div class="card expense"><span>Contas a pagar</span><strong id="totalExpense">R$ 0,00</strong><small id="expenseCount">0 lançamentos</small></div>
+          <div class="card balance"><span>Saldo do período</span><strong id="balance">R$ 0,00</strong><small>Receitas − despesas</small></div>
+          <div class="card pending"><span>Em aberto</span><strong id="pending">R$ 0,00</strong><small>Contas não pagas</small></div>
+        </div>
+
+        <div class="grid">
+          <div class="panel">
+            <div class="panel-head"><h3>Movimentação</h3><span id="periodText"></span></div>
+            <div class="chart-wrap"><canvas id="financeChart"></canvas></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Resumo</h3></div>
+            <div id="summaryList" class="summary-list"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Próximas contas</h3><button class="link-btn" id="openAll">Ver lançamentos</button></div>
+          <div id="upcomingList" class="table-wrap"></div>
+        </div>
+      </section>
+
+      <section id="lancamentosView" class="view hidden">
+        <div class="filters">
+          <div class="search"><label>Pesquisar</label><input id="searchInput" placeholder="Descrição, categoria, forma..."></div>
+          <div><label>Tipo</label><select id="typeFilter"><option value="all">Todos</option><option value="income">Receita</option><option value="expense">Despesa</option></select></div>
+          <div><label>Status</label><select id="statusFilter"><option value="all">Todos</option><option value="paid">Pago/Recebido</option><option value="pending">Pendente</option></select></div>
+        </div>
+        <div class="panel">
+          <div id="transactionsTable" class="table-wrap"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-head"><h3 id="modalTitle">Novo lançamento</h3><button id="closeModal">×</button></div>
+      <form id="transactionForm">
+        <input type="hidden" id="editId">
+        <div class="type-switch">
+          <label><input type="radio" name="type" value="income" checked> <span>💰 Receita</span></label>
+          <label><input type="radio" name="type" value="expense"> <span>📄 Conta a pagar</span></label>
+        </div>
+        <div class="form-grid">
+          <div><label>Descrição *</label><input id="description" required placeholder="Ex.: Venda, aluguel, boleto..."></div>
+          <div><label>Valor (R$) *</label><input id="amount" required type="number" min="0" step="0.01" placeholder="0,00"></div>
+          <div><label>Data *</label><input id="date" required type="date"></div>
+          <div><label>Vencimento</label><input id="dueDate" type="date"></div>
+          <div><label>Categoria</label><input id="category" placeholder="Ex.: Alimentação, aluguel..."></div>
+          <div><label>Forma</label><input id="method" placeholder="Pix, dinheiro, boleto, cartão..."></div>
+          <div><label>Status</label><select id="status"><option value="paid">Pago/Recebido</option><option value="pending">Pendente</option></select></div>
+          <div><label>Observação</label><input id="note" placeholder="Opcional"></div>
+        </div>
+        <div class="modal-actions"><button type="button" id="cancelBtn" class="secondary">Cancelar</button><button class="primary">Salvar lançamento</button></div>
+      </form>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
