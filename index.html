@@ -42,9 +42,13 @@
               <option value="all">Todos</option>
             </select>
           </div>
-          <div>
+          <div class="date-control">
             <label>Data de referência</label>
-            <input type="date" id="referenceDate">
+            <div class="date-input-group">
+              <button id="prevPeriod" class="nav-btn-icon" title="Período anterior">◀</button>
+              <input type="date" id="referenceDate">
+              <button id="nextPeriod" class="nav-btn-icon" title="Próximo período">▶</button>
+            </div>
           </div>
         </div>
 
