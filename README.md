@@ -19,6 +19,7 @@
 - Valor, data, vencimento, categoria, forma e status.
 - Edição e exclusão de lançamentos.
 - Dashboard por dia, semana, mês ou todos.
+- **Navegação entre períodos**: botões ◀ ▶ ao lado da data de referência para avançar/retroceder dias, semanas ou meses.
 - Gráfico de receitas x despesas (Chart.js).
 - Indicador de saldo e contas pendentes.
 - Lista de próximas contas a vencer.
@@ -28,10 +29,3 @@
 
 ### Importante
 Esta versão funciona sem banco de dados. Os dados ficam salvos no navegador/dispositivo em que foram cadastrados. Para ter os mesmos dados automaticamente no computador e no celular, será necessário adicionar um banco de dados e autenticação em uma próxima versão.
-
-### Correções aplicadas
-- Navegação entre abas (Dashboard / Lançamentos) agora funciona perfeitamente.
-- Botão "+ Novo lançamento" abre o modal de cadastro sem falhas.
-- Código envolvido em `DOMContentLoaded` para garantir que todos os elementos estejam disponíveis.
-- Fallback para `crypto.randomUUID()` em navegadores antigos.
-- Tratamento de erro caso o Chart.js não seja carregado (exibe mensagem amigável).
