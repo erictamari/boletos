@@ -15,18 +15,23 @@
 6. Salve e aguarde o GitHub Pages publicar.
 
 ## Recursos
-- Cadastro de receitas.
-- Cadastro de contas/despesas.
+- Cadastro de receitas e despesas.
 - Valor, data, vencimento, categoria, forma e status.
 - Edição e exclusão de lançamentos.
 - Dashboard por dia, semana, mês ou todos.
-- Gráfico de receitas x despesas.
-- Indicador de saldo.
-- Indicador de contas pendentes.
-- Lista de próximas contas.
-- Pesquisa e filtros.
+- Gráfico de receitas x despesas (Chart.js).
+- Indicador de saldo e contas pendentes.
+- Lista de próximas contas a vencer.
+- Pesquisa e filtros por tipo/status.
 - Exportação/importação de backup em JSON.
 - Dados salvos no navegador com `localStorage`.
 
 ### Importante
 Esta versão funciona sem banco de dados. Os dados ficam salvos no navegador/dispositivo em que foram cadastrados. Para ter os mesmos dados automaticamente no computador e no celular, será necessário adicionar um banco de dados e autenticação em uma próxima versão.
+
+### Correções aplicadas
+- Navegação entre abas (Dashboard / Lançamentos) agora funciona perfeitamente.
+- Botão "+ Novo lançamento" abre o modal de cadastro sem falhas.
+- Código envolvido em `DOMContentLoaded` para garantir que todos os elementos estejam disponíveis.
+- Fallback para `crypto.randomUUID()` em navegadores antigos.
+- Tratamento de erro caso o Chart.js não seja carregado (exibe mensagem amigável).
