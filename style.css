@@ -1,0 +1,41 @@
+/* Novos estilos para navegação de período */
+.date-control {
+  min-width: 220px;
+}
+.date-input-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.date-input-group input[type="date"] {
+  flex: 1;
+  min-width: 0;
+}
+.nav-btn-icon {
+  background: #eef1f6;
+  border: 1px solid #dce2eb;
+  border-radius: 9px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  transition: background 0.2s;
+}
+.nav-btn-icon:hover {
+  background: #dce2eb;
+}
+.nav-btn-icon:active {
+  background: #c8cfdb;
+}
+@media (max-width: 600px) {
+  .date-control {
+    min-width: 100%;
+  }
+  .date-input-group {
+    flex-wrap: nowrap;
+  }
+  .nav-btn-icon {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
